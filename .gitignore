@@ -1,0 +1,24 @@
+# Dataset (baixado via tensorflow-datasets)
+data/
+*.tfrecord
+
+# Cache do TensorFlow Datasets
+tensorflow_datasets/
+
+# Checkpoint intermediário do baseline (NÃO é o entregável).
+# O melhor modelo, models/cnn_b_best.keras, DEVE ser versionado.
+models/cnn_a_best.keras
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# SO
+.DS_Store
+Thumbs.db
