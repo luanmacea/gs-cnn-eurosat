@@ -14,10 +14,11 @@ diferentes fontes.
 
 ## 👥 Integrantes
 
-> **PREENCHER** — nome completo e RM de cada integrante.
-
-- Nome — RM
-- Nome — RM
+* Davi Passanha de Sousa Guerra - RM551605
+* Cauã Gonçalves de Jesus - RM97648
+* Luan Silveira Macea - RM98290
+* Rui Amorim Siqueira - RM98436
+* Luigi Ferrara Sinno - RM98047
 
 ## 🎥 Vídeo de apresentação
 
@@ -80,12 +81,12 @@ configuração local). Também funciona localmente.
 
 1. Suba este repositório para o seu GitHub.
 2. Abra cada notebook no Colab (`Arquivo → Abrir notebook → GitHub`, ou
-   `https://colab.research.google.com/github/SEU_USUARIO/gs-cnn-eurosat`).
+   `https://colab.research.google.com/github/luanmacea/gs-cnn-eurosat`).
 3. Ative a GPU: **Ambiente de execução → Alterar tipo de ambiente → T4 GPU**.
 4. Na **primeira célula** de cada notebook, descomente o bloco do Colab para
    clonar o repo e instalar as dependências:
    ```python
-   !git clone https://github.com/SEU_USUARIO/gs-cnn-eurosat.git
+   !git clone https://github.com/luanmacea/gs-cnn-eurosat.git
    %cd gs-cnn-eurosat
    !pip install -q -r requirements.txt
    ```
