@@ -1,11 +1,6 @@
-# Stack testada com Python 3.12 (compatível com o Google Colab atual).
-# TensorFlow >= 2.16 usa Keras 3 — o código foi validado sob TF 2.17.1 / Keras 3.14.
+# Colab: só instala o que o Colab não traz ou precisa de versão específica.
+# numpy, scikit-learn, matplotlib, seaborn, pandas e pillow já vêm no Colab
+# e não precisam ser re-instalados (re-instalação causa conflito com JAX/cupy).
 tensorflow==2.17.1
 tensorflow-datasets==4.9.6
-numpy==1.26.4
-scikit-learn==1.4.2
-matplotlib==3.8.4
-seaborn==0.13.2
-pandas==2.2.2
-pillow==10.4.0
 streamlit==1.38.0
