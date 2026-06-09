@@ -57,8 +57,11 @@ def build_cnn_b(input_shape=(64, 64, 3), num_classes=10):
       - Dropout progressivo (0.25 -> 0.5): regularização crescente.
       - GlobalAveragePooling no lugar de Flatten: reduz drasticamente os
         parâmetros da camada densa final e atua como regularizador estrutural.
-      - Dois Conv seguidos antes do pooling: aumenta o campo receptivo sem
-        perda agressiva de resolução.
+      - Dois Conv seguidos por bloco (64 -> 128 -> 256 filtros): aumenta a
+        capacidade e o campo receptivo. Esta largura é necessária para
+        ultrapassar o platô de ~82% que uma rede mais estreita atinge no
+        EuroSAT RGB; com a regularização acima, o modelo generaliza para
+        a faixa de 90%+.
     """
     data_augmentation = models.Sequential(
         [
@@ -75,32 +78,36 @@ def build_cnn_b(input_shape=(64, 64, 3), num_classes=10):
             layers.Rescaling(1.0 / 255),
             data_augmentation,
             # Bloco 1
-            layers.Conv2D(32, 3, padding="same"),
+            layers.Conv2D(64, 3, padding="same"),
             layers.BatchNormalization(),
             layers.Activation("relu"),
-            layers.Conv2D(32, 3, padding="same"),
+            layers.Conv2D(64, 3, padding="same"),
             layers.BatchNormalization(),
             layers.Activation("relu"),
             layers.MaxPooling2D(),
             layers.Dropout(0.25),
             # Bloco 2
-            layers.Conv2D(64, 3, padding="same"),
+            layers.Conv2D(128, 3, padding="same"),
             layers.BatchNormalization(),
             layers.Activation("relu"),
-            layers.Conv2D(64, 3, padding="same"),
-            layers.BatchNormalization(),
-            layers.Activation("relu"),
-            layers.MaxPooling2D(),
-            layers.Dropout(0.25),
-            # Bloco 3
             layers.Conv2D(128, 3, padding="same"),
             layers.BatchNormalization(),
             layers.Activation("relu"),
             layers.MaxPooling2D(),
             layers.Dropout(0.3),
+            # Bloco 3
+            layers.Conv2D(256, 3, padding="same"),
+            layers.BatchNormalization(),
+            layers.Activation("relu"),
+            layers.Conv2D(256, 3, padding="same"),
+            layers.BatchNormalization(),
+            layers.Activation("relu"),
+            layers.MaxPooling2D(),
+            layers.Dropout(0.4),
             # Classificador
             layers.GlobalAveragePooling2D(),
             layers.Dense(256, activation="relu"),
+            layers.BatchNormalization(),
             layers.Dropout(0.5),
             layers.Dense(num_classes, activation="softmax"),
         ],
