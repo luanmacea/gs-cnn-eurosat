@@ -1,6 +1,23 @@
-# Colab: só instala o que o Colab não traz ou precisa de versão específica.
-# numpy, scikit-learn, matplotlib, seaborn, pandas e pillow já vêm no Colab
-# e não precisam ser re-instalados (re-instalação causa conflito com JAX/cupy).
+# ============================================================================
+# ATENÇÃO — LEIA ANTES DE USAR
+#
+# Este arquivo é APENAS para instalação LOCAL (venv em máquina limpa).
+#
+# NO GOOGLE COLAB, **NÃO** rode `pip install -r requirements.txt`.
+# O Colab já vem com TensorFlow, Keras, numpy, pandas, scikit-learn,
+# matplotlib, seaborn e tensorflow-datasets em versões compatíveis entre si.
+# Reinstalar as versões fixas abaixo rebaixa o numpy/ml_dtypes e quebra o JAX
+# do Colab (erro "JAX requires ml_dtypes version 0.5 or newer").
+# No Colab, apenas clone o repositório e rode os notebooks direto.
+# ============================================================================
+
+# Validado sob TF 2.17.1 / Keras 3.14 (Python 3.10–3.12).
 tensorflow==2.17.1
 tensorflow-datasets==4.9.6
+numpy==1.26.4
+scikit-learn==1.4.2
+matplotlib==3.8.4
+seaborn==0.13.2
+pandas==2.2.2
+pillow==10.4.0
 streamlit==1.38.0

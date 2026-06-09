@@ -84,13 +84,22 @@ configuração local). Também funciona localmente.
    `https://colab.research.google.com/github/luanmacea/gs-cnn-eurosat`).
 3. Ative a GPU: **Ambiente de execução → Alterar tipo de ambiente → T4 GPU**.
 4. Na **primeira célula** de cada notebook, descomente o bloco do Colab para
-   clonar o repo e instalar as dependências:
+   clonar o repositório:
    ```python
    !git clone https://github.com/luanmacea/gs-cnn-eurosat.git
    %cd gs-cnn-eurosat
-   !pip install -q -r requirements.txt
    ```
 5. Rode os notebooks **na ordem** (01 → 02 → 03 → 04).
+
+> ⚠️ **NÃO rode `pip install -r requirements.txt` no Colab.** O Colab já traz
+> TensorFlow, Keras, numpy, scikit-learn, matplotlib, seaborn e
+> tensorflow-datasets em versões compatíveis. Reinstalar as versões fixas
+> rebaixa o `numpy`/`ml_dtypes` e quebra o JAX do Colab (erro *"JAX requires
+> ml_dtypes version 0.5 or newer"*). O `requirements.txt` é só para uso local.
+>
+> Se reiniciar o runtime no meio do caminho, rode novamente a célula de clone
+> (`git clone` + `%cd`) antes das demais — a célula de bootstrap já lida com a
+> detecção da raiz do projeto automaticamente.
 
 ### Opção B — Local
 
