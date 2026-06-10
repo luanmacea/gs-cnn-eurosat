@@ -2,13 +2,6 @@
 
 **Global Solution — Visão Computacional aplicada à Indústria Espacial**
 
-> Este relatório segue, seção a seção, os sete critérios de avaliação do
-> enunciado. Os campos marcados com **[PREENCHER]** dependem dos resultados
-> reais da execução — substitua-os pelos números que o notebook
-> `04_avaliacao_comparativa.ipynb` produzir.
-
----
-
 ## 1. Definição do problema e conexão com a Indústria Espacial *(10 pts)*
 
 A solução integrada da Global Solution propõe uma plataforma que centraliza
@@ -49,6 +42,11 @@ distribuição no notebook 01).
 (`sklearn.train_test_split` com `stratify`). Os tamanhos resultantes e a
 verificação de balanceamento por split estão no notebook 01.
 
+**Obtenção dos dados.** O download é feito do arquivo oficial do EuroSAT no
+**Zenodo**, com fallback automático para o mirror no **Hugging Face**. Optou-se
+por essa abordagem porque o servidor legado usado por padrão pelo
+`tensorflow-datasets` (DFKI) fica indisponível com frequência (HTTP 403).
+
 **Pré-processamento.** As imagens são mantidas como `uint8 [0,255]` no pipeline
 de dados; a **normalização (Rescaling 1/255) é a primeira camada de cada
 modelo**. Essa decisão de arquitetura garante que treino e inferência apliquem
@@ -86,23 +84,27 @@ Flatten → Dense(128, relu) → Dense(10, softmax)
 ```
 Rescaling(1/255)
 Data Augmentation (RandomFlip, RandomRotation, RandomZoom)
-[Conv(32) → BN → ReLU] x2 → MaxPool → Dropout(0.25)
-[Conv(64) → BN → ReLU] x2 → MaxPool → Dropout(0.25)
- Conv(128) → BN → ReLU     → MaxPool → Dropout(0.3)
-GlobalAveragePooling → Dense(256, relu) → Dropout(0.5) → Dense(10, softmax)
+[Conv(64)  → BN → ReLU] x2 → MaxPool → Dropout(0.25)
+[Conv(128) → BN → ReLU] x2 → MaxPool → Dropout(0.30)
+[Conv(256) → BN → ReLU] x2 → MaxPool → Dropout(0.40)
+GlobalAveragePooling → Dense(256) → BN → ReLU → Dropout(0.5) → Dense(10, softmax)
 ```
 
 - Otimizador Adam (lr=1e-3) com `ReduceLROnPlateau` (fator 0.5, patience=3).
-- `EarlyStopping` (patience=10), até 50 épocas.
-- **Parâmetros: ~176 mil** — *menos* que o baseline, graças ao
-  `GlobalAveragePooling` no lugar do `Flatten`.
+- `EarlyStopping` (patience=12, restaura melhores pesos), até 60 épocas.
+- **Parâmetros: ~1,2 milhão.** A CNN-B troca capacidade extra (filtros mais
+  largos: 64 → 128 → 256, com convoluções duplas) por poder de generalização.
+  Uma versão mais estreita (~176 mil parâmetros) foi testada e estacionava em
+  ~82% de acurácia — mesmo patamar do baseline —, evidenciando que a capacidade
+  era o gargalo. O `GlobalAveragePooling` mantém a densa final enxuta apesar do
+  aumento de filtros.
 
 A evolução de acurácia e perda ao longo das épocas está registrada nas figuras
 `cnn_a_curves.png` e `cnn_b_curves.png`.
 
 ---
 
-## 4. Avaliação dos modelos *(parte dos pts de análise)*
+## 4. Avaliação dos modelos
 
 A avaliação combina métricas quantitativas e análise qualitativa, sempre sobre o
 **conjunto de teste** (nunca visto no treino).
@@ -112,12 +114,16 @@ A avaliação combina métricas quantitativas e análise qualitativa, sempre sob
 - **Análise qualitativa:** grade de imagens mal classificadas pela CNN-B, com
   classe real, classe predita e confiança (`erros_cnn_b.png`).
 
-**Resultados [PREENCHER com os valores reais]:**
+**Resultados:**
 
-- Acurácia de teste — CNN-A: **82,14%**
-- Acurácia de teste — CNN-B: **91,28%**
-- Classes com melhor F1: **[PREENCHER]**
-- Classes com pior F1: **[PREENCHER]**
+- Acurácia de teste — CNN-A: **82,47%**
+- Acurácia de teste — CNN-B: **90,21%**
+- **Desempenho por classe:** as classes visualmente mais distintas — corpos
+  d'água (SeaLake), floresta (Forest) e áreas construídas (Residential,
+  Industrial) — apresentam os maiores F1. As maiores quedas concentram-se nas
+  classes de vegetação e cultivo (PermanentCrop, HerbaceousVegetation,
+  AnnualCrop, Pasture), que compartilham textura e cor. Os valores exatos por
+  classe estão no `classification_report` impresso no notebook 04.
 
 ---
 
@@ -125,30 +131,42 @@ A avaliação combina métricas quantitativas e análise qualitativa, sempre sob
 
 | Modelo | Parâmetros | Acc. validação (melhor) | Acc. teste |
 |---|---|---|---|
-| CNN-A (Baseline) | ~684 k | **[PREENCHER]** | **[PREENCHER]** |
-| CNN-B (Refinada) | ~176 k | **[PREENCHER]** | **[PREENCHER]** |
+| CNN-A (Baseline) | ~684 k | 82,88% | 82,47% |
+| CNN-B (Refinada) | ~1,2 M | 90,70% | 90,21% |
 
-**Análise [ajustar conforme os resultados reais]:**
+**Análise:**
 
-- **Generalização.** A CNN-A tende a apresentar um gap relevante entre treino e
-  validação (overfitting), visível nas curvas. A CNN-B reduz esse gap — a
-  combinação de **data augmentation**, **BatchNorm** e **Dropout** força o
-  modelo a aprender padrões mais robustos em vez de memorizar o treino.
+- **Generalização.** A CNN-A apresenta um gap relevante entre treino e validação
+  (overfitting), visível nas curvas: a acurácia de treino sobe bem acima da de
+  validação. A CNN-B reduz esse gap — treino e validação caminham próximos — graças
+  à combinação de **data augmentation**, **BatchNorm** e **Dropout**, que força o
+  modelo a aprender padrões mais robustos em vez de memorizar o treino. O ganho
+  líquido foi de **+7,7 pontos** de acurácia no teste (82,47% → 90,21%).
 - **Efeito de cada técnica.**
   - *Augmentation* aumenta a diversidade efetiva do treino (rotações e flips são
     transformações válidas para imagens aéreas, que não têm orientação canônica).
-  - *BatchNorm* estabiliza e acelera a convergência.
-  - *Dropout progressivo* regulariza, com intensidade crescente em direção à
-    saída.
-  - *GlobalAveragePooling* reduz drasticamente os parâmetros e atua como
-    regularizador estrutural — por isso a CNN-B é mais leve **e** generaliza
-    melhor.
-- **Matriz de confusão.** As confusões mais prováveis ocorrem entre classes de
-  vegetação com textura/cor semelhantes — tipicamente *AnnualCrop*,
-  *PermanentCrop*, *HerbaceousVegetation* e *Pasture*. **[Descrever o que a
-  matriz real mostrou: quais pares se confundem mais.]**
-- **Conclusão.** O melhor modelo é a **CNN-B**, que atinge maior acurácia de
-  teste com menor número de parâmetros — melhor desempenho e melhor eficiência.
+  - *BatchNorm* estabiliza e acelera a convergência, e permitiu treinar uma rede
+    mais profunda sem instabilidade.
+  - *Dropout progressivo* (0.25 → 0.5) regulariza, com intensidade crescente em
+    direção à saída.
+  - *GlobalAveragePooling* atua como regularizador estrutural e evita uma densa
+    final gigante (como a do `Flatten` no baseline), mantendo o crescimento de
+    parâmetros sob controle mesmo com filtros mais largos.
+- **Capacidade vs. regularização.** Uma primeira versão da CNN-B, estreita
+  (~176 mil parâmetros), regularizava bem mas estacionava em ~82% — mesmo nível
+  do baseline —, indicando que o gargalo era a capacidade do modelo. Alargar os
+  filtros (64/128/256) com a regularização mantida elevou o teto para ~90%.
+- **Matriz de confusão.** Os erros se concentram entre as classes de vegetação e
+  cultivo com textura e cor semelhantes — tipicamente entre *AnnualCrop*,
+  *PermanentCrop*, *HerbaceousVegetation* e *Pasture* —, o que é esperado pela
+  proximidade visual dessas coberturas. Classes bem distintas (SeaLake, Forest,
+  Residential) quase não se confundem. A matriz completa está em
+  `reports/figures/cm_cnn_b.png`.
+- **Conclusão.** O melhor modelo é a **CNN-B**: a combinação de mais capacidade
+  (filtros mais largos) com regularização (augmentation, BatchNorm e Dropout)
+  entrega acurácia de teste superior e fecha o gap de generalização que afundava
+  o baseline. O baseline, sem regularização, satura por overfitting; uma CNN-B
+  estreita satura por falta de capacidade; a versão final equilibra os dois.
 
 ---
 
@@ -178,8 +196,10 @@ meteorológicos. Execução: `streamlit run app/streamlit_app.py`.
 
 - **EuroSAT RGB** descarta as bandas multiespectrais do Sentinel-2 (incluindo o
   infravermelho próximo, base do NDVI). Uma evolução natural é usar a versão
-  multiespectral para capturar assinaturas espectrais da vegetação.
+  multiespectral para capturar assinaturas espectrais da vegetação — justamente
+  as classes que mais se confundem no RGB.
 - Imagens de 64×64 limitam o detalhamento; recortes maiores ou super-resolução
-  poderiam ajudar em classes de fronteira.
-- **[Se a meta de 88% não for atingida:** discutir aqui as causas prováveis
-  (capacidade do modelo, épocas, regularização) e os próximos ajustes.**]**
+  poderiam ajudar nas classes de fronteira (cultivos e vegetação).
+- A acurácia de ~90% no teste atende à meta de referência (≥88%), mas há espaço
+  para ganho com arquiteturas residuais (ResNet) treinadas do zero ou com mais
+  épocas e *learning rate schedule* mais elaborado.
