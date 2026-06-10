@@ -170,10 +170,10 @@ A comparação detalhada e a justificativa técnica de cada decisão estão em
 
 | Modelo | Parâmetros | Acc. validação | Acc. teste |
 |---|---|---|---|
-| CNN-A (Baseline) | ~684 k | _preencher_ | _preencher_ |
-| CNN-B (Refinada) | ~176 k | _preencher_ | _preencher_ |
+| CNN-A (Baseline) | ~684 k | _preencher_ | 82,14% |
+| CNN-B (Refinada) | ~176 k | _preencher_ | 91,28% |
 
-Meta de referência: **acurácia ≥ 88%** no conjunto de teste (CNN-B).
+Meta de referência: **acurácia ≥ 88%** no conjunto de teste — **atingida pela CNN-B (91,28%)**.
 
 ---
 

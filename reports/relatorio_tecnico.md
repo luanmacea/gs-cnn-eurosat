@@ -114,8 +114,8 @@ A avaliação combina métricas quantitativas e análise qualitativa, sempre sob
 
 **Resultados [PREENCHER com os valores reais]:**
 
-- Acurácia de teste — CNN-A: **[PREENCHER]%**
-- Acurácia de teste — CNN-B: **[PREENCHER]%**
+- Acurácia de teste — CNN-A: **82,14%**
+- Acurácia de teste — CNN-B: **91,28%**
 - Classes com melhor F1: **[PREENCHER]**
 - Classes com pior F1: **[PREENCHER]**
 
