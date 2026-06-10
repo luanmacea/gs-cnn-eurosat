@@ -22,7 +22,7 @@ diferentes fontes.
 
 ## 🎥 Vídeo de apresentação
 
-📺 Link (YouTube, até 3 min): _a publicar_
+📺 Link (YouTube, até 3 min):
 
 ---
 
